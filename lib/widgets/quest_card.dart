@@ -4,6 +4,7 @@ import '../models/quest.dart';
 import '../providers/quests_provider.dart';
 import '../providers/user_stats_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:image_picker/image_picker.dart';
 
 class QuestCard extends ConsumerWidget {
   final Quest quest;
@@ -68,7 +69,45 @@ class QuestCard extends ConsumerWidget {
         child: const Icon(Icons.delete, color: Colors.white, size: 32),
       ),
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
+          if (!quest.isCompleted && quest.requiresPhoto) {
+            final source = await showModalBottomSheet<ImageSource>(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              builder: (context) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Verify Quest', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt),
+                      title: const Text('Take a Photo'),
+                      onTap: () => Navigator.pop(context, ImageSource.camera),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.photo_library),
+                      title: const Text('Choose from Gallery'),
+                      onTap: () => Navigator.pop(context, ImageSource.gallery),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+            if (source == null) return; // User dismissed bottom sheet
+
+            final ImagePicker picker = ImagePicker();
+            final XFile? image = await picker.pickImage(source: source);
+            if (image == null) {
+              // User cancelled taking photo/picking from gallery
+              return;
+            }
+          }
           ref.read(questsProvider.notifier).toggleQuest(quest.id);
         },
         child: AnimatedContainer(
@@ -111,14 +150,22 @@ class QuestCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      quest.name,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        decoration: quest.isCompleted ? TextDecoration.lineThrough : null,
-                        color: quest.isCompleted ? textColor.withValues(alpha: 0.5) : textColor,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          quest.name,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            decoration: quest.isCompleted ? TextDecoration.lineThrough : null,
+                            color: quest.isCompleted ? textColor.withValues(alpha: 0.5) : textColor,
+                          ),
+                        ),
+                        if (quest.requiresPhoto && !quest.isCompleted) ...[
+                          const SizedBox(width: 8),
+                          const Icon(Icons.camera_alt, size: 16, color: Colors.grey),
+                        ]
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Row(

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'models/quest.dart';
 import 'models/user_stats.dart';
+import 'models/shop_item.dart';
 import 'screens/home_screen.dart';
 import 'providers/theme_provider.dart';
 
@@ -14,10 +15,12 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(UserStatsAdapter());
   Hive.registerAdapter(QuestAdapter());
+  Hive.registerAdapter(ShopItemAdapter());
 
   await Hive.openBox('settingsBox');
   await Hive.openBox<UserStats>('userStatsBox');
   await Hive.openBox<Quest>('questsBox');
+  await Hive.openBox<ShopItem>('shopItemsBox');
 
   runApp(const ProviderScope(child: DopaQuestApp()));
 }

@@ -7,6 +7,7 @@ class Quest {
   int baseXp;
   int baseGold;
   bool isCompleted;
+  bool requiresPhoto;
 
   Quest({
     required this.id,
@@ -15,6 +16,7 @@ class Quest {
     required this.baseXp,
     required this.baseGold,
     this.isCompleted = false,
+    this.requiresPhoto = false,
   });
 
   Quest copyWith({
@@ -24,6 +26,7 @@ class Quest {
     int? baseXp,
     int? baseGold,
     bool? isCompleted,
+    bool? requiresPhoto,
   }) {
     return Quest(
       id: id ?? this.id,
@@ -32,6 +35,7 @@ class Quest {
       baseXp: baseXp ?? this.baseXp,
       baseGold: baseGold ?? this.baseGold,
       isCompleted: isCompleted ?? this.isCompleted,
+      requiresPhoto: requiresPhoto ?? this.requiresPhoto,
     );
   }
 }
@@ -42,13 +46,26 @@ class QuestAdapter extends TypeAdapter<Quest> {
 
   @override
   Quest read(BinaryReader reader) {
+    var id = reader.readString();
+    var name = reader.readString();
+    var frequency = reader.readString();
+    var baseXp = reader.readInt();
+    var baseGold = reader.readInt();
+    var isCompleted = reader.readBool();
+    
+    bool requiresPhoto = false;
+    if (reader.availableBytes > 0) {
+      requiresPhoto = reader.readBool();
+    }
+
     return Quest(
-      id: reader.readString(),
-      name: reader.readString(),
-      frequency: reader.readString(),
-      baseXp: reader.readInt(),
-      baseGold: reader.readInt(),
-      isCompleted: reader.readBool(),
+      id: id,
+      name: name,
+      frequency: frequency,
+      baseXp: baseXp,
+      baseGold: baseGold,
+      isCompleted: isCompleted,
+      requiresPhoto: requiresPhoto,
     );
   }
 
@@ -60,5 +77,6 @@ class QuestAdapter extends TypeAdapter<Quest> {
     writer.writeInt(obj.baseXp);
     writer.writeInt(obj.baseGold);
     writer.writeBool(obj.isCompleted);
+    writer.writeBool(obj.requiresPhoto);
   }
 }

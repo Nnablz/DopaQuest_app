@@ -14,6 +14,7 @@ class _AddQuestDialogState extends ConsumerState<AddQuestDialog> {
   final _nameController = TextEditingController();
   final _xpController = TextEditingController(text: '10');
   final _goldController = TextEditingController(text: '5');
+  bool _requiresPhoto = false;
 
   @override
   void dispose() {
@@ -36,6 +37,7 @@ class _AddQuestDialogState extends ConsumerState<AddQuestDialog> {
       frequency: 'Daily',
       baseXp: xp,
       baseGold: gold,
+      requiresPhoto: _requiresPhoto,
     );
 
     ref.read(questsProvider.notifier).addQuest(newQuest);
@@ -105,6 +107,20 @@ class _AddQuestDialogState extends ConsumerState<AddQuestDialog> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            title: const Text('Require Photo Verification'),
+            subtitle: const Text('Must take a photo to complete'),
+            value: _requiresPhoto,
+            onChanged: (val) {
+              setState(() {
+                _requiresPhoto = val;
+              });
+            },
+            secondary: const Icon(Icons.camera_alt),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            tileColor: Theme.of(context).cardColor,
           ),
           const SizedBox(height: 24),
           ElevatedButton(
